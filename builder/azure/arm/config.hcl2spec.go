@@ -365,6 +365,7 @@ type FlatSharedImageGalleryDestination struct {
 	SigDestinationImageName          *string  `mapstructure:"image_name" cty:"image_name" hcl:"image_name"`
 	SigDestinationImageVersion       *string  `mapstructure:"image_version" cty:"image_version" hcl:"image_version"`
 	SigDestinationReplicationRegions []string `mapstructure:"replication_regions" cty:"replication_regions" hcl:"replication_regions"`
+	SigDestinationReplicationMode    *string  `mapstructure:"replication_mode" cty:"replication_mode" hcl:"replication_mode"`
 	SigDestinationStorageAccountType *string  `mapstructure:"storage_account_type" cty:"storage_account_type" hcl:"storage_account_type"`
 	SigDestinationSpecialized        *bool    `mapstructure:"specialized" cty:"specialized" hcl:"specialized"`
 }
@@ -387,6 +388,7 @@ func (*FlatSharedImageGalleryDestination) HCL2Spec() map[string]hcldec.Spec {
 		"image_name":           &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
 		"image_version":        &hcldec.AttrSpec{Name: "image_version", Type: cty.String, Required: false},
 		"replication_regions":  &hcldec.AttrSpec{Name: "replication_regions", Type: cty.List(cty.String), Required: false},
+		"replication_mode":     &hcldec.AttrSpec{Name: "replication_mode", Type: cty.String, Required: false},
 		"storage_account_type": &hcldec.AttrSpec{Name: "storage_account_type", Type: cty.String, Required: false},
 		"specialized":          &hcldec.AttrSpec{Name: "specialized", Type: cty.Bool, Required: false},
 	}

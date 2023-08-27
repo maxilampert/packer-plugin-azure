@@ -52,6 +52,18 @@ func getSigDestinationStorageAccountType(s string) (galleryimageversions.Storage
 	return "", fmt.Errorf("not an accepted value for shared_image_gallery_destination.storage_account_type")
 }
 
+func getSigDestinationReplicationMode(s string) (galleryimageversions.ReplicationMode, error) {
+	if s == "" {
+		return galleryimageversions.ReplicationModeFull, nil
+	}
+	for _, t := range galleryimageversions.PossibleValuesForReplicationMode() {
+		if s == t {
+			return galleryimageversions.ReplicationMode(t), nil
+		}
+	}
+	return "", fmt.Errorf("not an accepted value for shared_image_gallery_destination.replication_mode")
+}
+
 func getSigDestination(state multistep.StateBag) SharedImageGalleryDestination {
 	subscription := state.Get(constants.ArmManagedImageSubscription).(string)
 	resourceGroup := state.Get(constants.ArmManagedImageSigPublishResourceGroup).(string)
@@ -59,6 +71,7 @@ func getSigDestination(state multistep.StateBag) SharedImageGalleryDestination {
 	imageName := state.Get(constants.ArmManagedImageSharedGalleryImageName).(string)
 	imageVersion := state.Get(constants.ArmManagedImageSharedGalleryImageVersion).(string)
 	replicationRegions := state.Get(constants.ArmManagedImageSharedGalleryReplicationRegions).([]string)
+	replicationMode := state.Get(constants.ArmManagedImageSharedGalleryReplicationMode).(string)
 	storageAccountType := state.Get(constants.ArmManagedImageSharedGalleryImageVersionStorageAccountType).(string)
 
 	return SharedImageGalleryDestination{
@@ -68,6 +81,7 @@ func getSigDestination(state multistep.StateBag) SharedImageGalleryDestination {
 		SigDestinationImageName:          imageName,
 		SigDestinationImageVersion:       imageVersion,
 		SigDestinationReplicationRegions: replicationRegions,
+		SigDestinationReplicationMode:    replicationMode,
 		SigDestinationStorageAccountType: storageAccountType,
 	}
 }
@@ -80,6 +94,12 @@ func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, subs
 	}
 
 	storageAccountType, err := getSigDestinationStorageAccountType(sharedImageGallery.SigDestinationStorageAccountType)
+	if err != nil {
+		s.error(err)
+		return "", err
+	}
+
+	replicationMode, err := getSigDestinationReplicationMode(sharedImageGallery.SigDestinationReplicationMode)
 	if err != nil {
 		s.error(err)
 		return "", err
@@ -109,6 +129,7 @@ func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, subs
 				EndOfLifeDate:      &miSGImageVersionEndOfLifeDate,
 				ExcludeFromLatest:  &miSGImageVersionExcludeFromLatest,
 				ReplicaCount:       &miSigReplicaCount,
+				ReplicationMode:    &replicationMode,
 				StorageAccountType: &storageAccountType,
 			},
 		},
@@ -183,6 +204,7 @@ func (s *StepPublishToSharedImageGallery) Run(ctx context.Context, stateBag mult
 		s.say(fmt.Sprintf(" -> SIG Encryption Set : %s", diskEncryptionSetId))
 	}
 	s.say(fmt.Sprintf(" -> SIG replication regions               : '%v'", sharedImageGallery.SigDestinationReplicationRegions))
+	s.say(fmt.Sprintf(" -> SIG replication mode                  : '%v'", sharedImageGallery.SigDestinationReplicationMode))
 	s.say(fmt.Sprintf(" -> SIG storage account type              : '%s'", sharedImageGallery.SigDestinationStorageAccountType))
 	s.say(fmt.Sprintf(" -> SIG image version endoflife date      : '%s'", miSGImageVersionEndOfLifeDate))
 	s.say(fmt.Sprintf(" -> SIG image version exclude from latest : '%t'", miSGImageVersionExcludeFromLatest))

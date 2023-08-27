@@ -528,6 +528,7 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 		stateBag.Put(constants.ArmManagedImageSharedGalleryImageVersion, b.config.SharedGalleryDestination.SigDestinationImageVersion)
 		stateBag.Put(constants.ArmManagedImageSharedGalleryImageVersionStorageAccountType, b.config.SharedGalleryDestination.SigDestinationStorageAccountType)
 		stateBag.Put(constants.ArmSharedImageGalleryDestinationSpecialized, b.config.SharedGalleryDestination.SigDestinationSpecialized)
+		stateBag.Put(constants.ArmManagedImageSharedGalleryReplicationMode, b.config.SharedGalleryDestination.SigDestinationReplicationMode)
 		stateBag.Put(constants.ArmManagedImageSubscription, b.config.ClientConfig.SubscriptionID)
 		stateBag.Put(constants.ArmManagedImageSharedGalleryImageVersionEndOfLifeDate, b.config.SharedGalleryImageVersionEndOfLifeDate)
 		stateBag.Put(constants.ArmManagedImageSharedGalleryImageVersionReplicaCount, b.config.SharedGalleryImageVersionReplicaCount)
@@ -560,6 +561,7 @@ func (b *Builder) managedImageArtifactWithSIGAsDestination(managedImageID string
 		constants.ArmManagedImageSharedGalleryImageName,
 		constants.ArmManagedImageSharedGalleryImageVersion,
 		constants.ArmManagedImageSharedGalleryReplicationRegions,
+		constants.ArmManagedImageSharedGalleryReplicationMode,
 	}
 
 	for _, key := range sigDestinationStateKeys {
@@ -596,6 +598,7 @@ func (b *Builder) sharedImageArtifact(stateData map[string]interface{}) (*Artifa
 		constants.ArmManagedImageSharedGalleryImageName,
 		constants.ArmManagedImageSharedGalleryImageVersion,
 		constants.ArmManagedImageSharedGalleryReplicationRegions,
+		constants.ArmManagedImageSharedGalleryReplicationMode,
 	}
 
 	for _, key := range sigDestinationStateKeys {

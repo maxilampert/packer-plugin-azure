@@ -97,12 +97,16 @@ type SharedImageGallery struct {
 }
 
 type SharedImageGalleryDestination struct {
-	SigDestinationSubscription       string   `mapstructure:"subscription"`
-	SigDestinationResourceGroup      string   `mapstructure:"resource_group"`
-	SigDestinationGalleryName        string   `mapstructure:"gallery_name"`
-	SigDestinationImageName          string   `mapstructure:"image_name"`
-	SigDestinationImageVersion       string   `mapstructure:"image_version"`
+	SigDestinationSubscription  string `mapstructure:"subscription"`
+	SigDestinationResourceGroup string `mapstructure:"resource_group"`
+	SigDestinationGalleryName   string `mapstructure:"gallery_name"`
+	SigDestinationImageName     string `mapstructure:"image_name"`
+	SigDestinationImageVersion  string `mapstructure:"image_version"`
+	// Specify the replication regions for the Shared Image Gallery Image Version.
 	SigDestinationReplicationRegions []string `mapstructure:"replication_regions"`
+	// Specify the replication mode type for the Shared Image Gallery Image Version.
+	// Defaults to `Full`. Accepted values are `Full`, `Shallow`
+	SigDestinationReplicationMode string `mapstructure:"replication_mode"`
 	// Specify a storage account type for the Shared Image Gallery Image Version.
 	// Defaults to `Standard_LRS`. Accepted values are `Standard_LRS`, `Standard_ZRS` and `Premium_LRS`
 	SigDestinationStorageAccountType string `mapstructure:"storage_account_type"`
@@ -1374,6 +1378,12 @@ func assertRequiredParametersSet(c *Config, errs *packersdk.MultiError) {
 	}
 
 	/////////////////////////////////////////////
+	// SIG
+	if ok, err := assertSigReplicationMode(c.SharedGalleryDestination.SigDestinationReplicationMode); !ok {
+		errs = packersdk.MultiErrorAppend(errs, err)
+	}
+
+	/////////////////////////////////////////////
 	// License Type (Azure Hybrid Benefit)
 	if c.LicenseType != "" {
 		// Assumes OS is case-sensitive match as it has already been
@@ -1439,6 +1449,14 @@ func assertAllowedInboundIpAddresses(ipAddresses []string, setting string) (bool
 
 func assertSigAllowedStorageAccountType(s string) (bool, error) {
 	_, err := getSigDestinationStorageAccountType(s)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func assertSigReplicationMode(s string) (bool, error) {
+	_, err := getSigDestinationReplicationMode(s)
 	if err != nil {
 		return false, err
 	}
